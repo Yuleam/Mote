@@ -6,9 +6,6 @@ workflows:
     integrations:
       app_store_connect: Codemagic
     environment:
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: app.purl.knitting
       node: 20
       vars:
         BUNDLE_ID: "app.purl.knitting"
@@ -32,19 +29,21 @@ workflows:
         script: |
           cd ios/App
           pod install
-      - name: Xcode 빌드
+      - name: 서명 파일 생성
+        script: |
+          app-store-connect fetch-signing-files $BUNDLE_ID \
+            --type IOS_APP_STORE \
+            --create
+      - name: 서명 프로파일 적용
+        script: xcode-project use-profiles
+      - name: IPA 빌드
         script: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Release \
-            -archivePath build/App.xcarchive \
-            archive \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO
+          xcode-project build-ipa \
+            --workspace App.xcworkspace \
+            --scheme App
     artifacts:
-      - ios/App/build/**/*.ipa
+      - ios/App/build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
         auth: integration
