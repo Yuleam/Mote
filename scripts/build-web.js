@@ -29,7 +29,8 @@ html = html.replace(
 
 // manifest, sw 등 PWA 관련은 네이티브 앱에서 불필요하므로 제거
 html = html.replace(/<link rel="manifest"[^>]*>/g, '');
-html = html.replace(/if\s*\(\s*['"]serviceWorker['"]\s*in\s*navigator\s*\)[\s\S]*?}\s*\)\s*;?\s*/g, '');
+// Service Worker if 블록 전체 제거 (주석 + if 블록 + 닫는 중괄호)
+html = html.replace(/\/\/\s*-+\s*Service Worker\s*-+\s*\n\s*if\s*\(\s*['"]serviceWorker['"]\s*in\s*navigator\s*\)\s*\{\s*\n[^\n]*\n\s*\}/g, '');
 
 fs.writeFileSync(path.join(WWW, 'index.html'), html, 'utf-8');
 
