@@ -44,20 +44,17 @@ workflows:
         script: keychain add-certificates
       - name: 서명 프로파일 적용
         script: xcode-project use-profiles
-      - name: 빌드 번호 자동 증가
+      - name: 빌드 번호 설정 + IPA 빌드
         script: |
           LATEST=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo "0")
           NEW_BUILD=$((LATEST + 1))
           echo "빌드 번호: $NEW_BUILD"
-          PLIST="ios/App/App/Info.plist"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" "$PLIST"
-          /usr/libexec/PlistBuddy -c "Print :CFBundleVersion" "$PLIST"
-      - name: IPA 빌드
-        script: |
+          find ios -name "Info.plist" -exec /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" {} \; 2>/dev/null || true
           cd ios/App
           xcode-project build-ipa \
             --project App.xcodeproj \
-            --scheme App
+            --scheme App \
+            --archive-xcargs "CURRENT_PROJECT_VERSION=$NEW_BUILD"
     artifacts:
       - ios/App/build/ios/ipa/*.ipa
     publishing:
