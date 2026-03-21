@@ -20,15 +20,23 @@ workflows:
       - name: 루트 npm 설치
         script: npm install
       - name: 웹 빌드 (www/ 생성)
-        script: npm run build:web
-      - name: iOS 플랫폼 추가
         script: |
-          npx cap add ios || true
+          npm run build:web
+          ls -la www/
+      - name: iOS 플랫폼 추가 + 동기화
+        script: |
+          npx cap add ios || echo "iOS platform already exists"
           npx cap sync ios
-      - name: Xcode 프로젝트 설정
+          echo "=== iOS 디렉토리 구조 ==="
+          ls -la ios/App/
+      - name: CocoaPods 설치
         script: |
           cd ios/App
-          pod install
+          if [ -f Podfile ]; then
+            pod install --repo-update
+          else
+            echo "Podfile not found, skipping pod install"
+          fi
       - name: 서명 파일 생성
         script: |
           app-store-connect fetch-signing-files $BUNDLE_ID \
