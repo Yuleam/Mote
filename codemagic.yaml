@@ -25,14 +25,12 @@ workflows:
         script: |
           npx cap add ios || echo "iOS platform already exists"
           npx cap sync ios
-      - name: CocoaPods 설치
+      - name: iOS 프로젝트 구조 확인
         script: |
-          cd ios/App
-          if [ -f Podfile ]; then
-            pod install --repo-update
-          else
-            echo "Podfile not found, skipping"
-          fi
+          echo "=== ios/App 내용 ==="
+          ls -la ios/App/
+          echo "=== xcodeproj 확인 ==="
+          find ios -name "*.xcodeproj" -o -name "*.xcworkspace" 2>/dev/null
       - name: 키체인 초기화
         script: keychain initialize
       - name: 인증서 키 생성 + 서명 파일
@@ -50,7 +48,7 @@ workflows:
         script: |
           cd ios/App
           xcode-project build-ipa \
-            --workspace App.xcworkspace \
+            --project App.xcodeproj \
             --scheme App
     artifacts:
       - ios/App/build/ios/ipa/*.ipa
