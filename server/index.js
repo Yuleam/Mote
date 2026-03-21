@@ -44,8 +44,8 @@ app.use(cors({
     if (origin && (origin.endsWith('.railway.app') || origin.endsWith('.onrender.com'))) {
       return callback(null, true);
     }
-    // Capacitor 네이티브 앱 (iOS)
-    if (origin && origin.startsWith('capacitor://')) {
+    // Capacitor 네이티브 앱 (iOS) — scheme이 'Purl' 또는 'capacitor'
+    if (origin && (origin.startsWith('capacitor://') || origin.startsWith('purl://'))) {
       return callback(null, true);
     }
     // 프로덕션: 같은 origin에서 서빙되는 정적 파일 (origin 없음 → 이미 위에서 처리)
