@@ -44,17 +44,28 @@ workflows:
         script: keychain add-certificates
       - name: 서명 프로파일 적용
         script: xcode-project use-profiles
-      - name: 빌드 번호 설정 + IPA 빌드
+      - name: 빌드 번호 설정
         script: |
           LATEST=$(app-store-connect get-latest-testflight-build-number "$BUNDLE_ID" || echo "0")
           NEW_BUILD=$((LATEST + 1))
-          echo "빌드 번호: $NEW_BUILD"
-          find ios -name "Info.plist" -exec /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $NEW_BUILD" {} \; 2>/dev/null || true
+          echo "=== 빌드 번호: $NEW_BUILD ==="
+          # Info.plist 직접 수정
+          find ios -name "Info.plist" | while read plist; do
+            echo "Updating $plist"
+            plutil -replace CFBundleVersion -string "$NEW_BUILD" "$plist"
+            plutil -p "$plist" | grep CFBundleVersion
+          done
+          # project.pbxproj의 CURRENT_PROJECT_VERSION도 수정
+          find ios -name "project.pbxproj" | while read pbx; do
+            echo "Updating $pbx"
+            sed -i '' "s/CURRENT_PROJECT_VERSION = [^;]*/CURRENT_PROJECT_VERSION = $NEW_BUILD/g" "$pbx"
+          done
+      - name: IPA 빌드
+        script: |
           cd ios/App
           xcode-project build-ipa \
             --project App.xcodeproj \
-            --scheme App \
-            --archive-xcargs "CURRENT_PROJECT_VERSION=$NEW_BUILD"
+            --scheme App
     artifacts:
       - ios/App/build/ios/ipa/*.ipa
     publishing:
