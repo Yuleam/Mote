@@ -25,12 +25,14 @@
 - 리뷰 의무/스트릭 (죄책감은 다정하지 않다)
 
 ## 기술 스택
-- Frontend: vanilla JS, IIFE 패턴, 번들러 없음 (capture.html, explorer.html 인라인)
-- Backend: Node.js + Express + sql.js (WebAssembly, no native build)
+- Frontend (웹): vanilla JS, IIFE 패턴, 번들러 없음 (capture.html, explorer.html 인라인)
+- Frontend (iOS 앱): Flutter 3.41.5 + Dart (flutter/ 디렉토리)
+- Backend: Node.js + Express + better-sqlite3 (네이티브 SQLite)
 - DB: SQLite (server/data/knitting.db)
 - 임베딩: KR-SBERT ONNX 로컬 실행 (server/services/embedder.js)
 - MCP Server: server/mcp-server.mjs
 - PWA: Service Worker + Web App Manifest + Share Target API (모바일 캡처)
+- 배포: Railway (서버), Codemagic (iOS 빌드)
 
 ## 코드 규칙
 - 프론트엔드: 인라인 IIFE 패턴 (capture.html, explorer.html 각각 자체 포함)
@@ -73,6 +75,26 @@ extension/            — Chrome 확장 프로그램 (조각 잡기)
   manifest.json       Manifest V3
   background.js       Service Worker (우클릭 잡기 + 토스트)
   popup.html/js       팝업 UI (직접 잡기)
+
+flutter/                — Flutter iOS 앱 (App Store 배포용)
+  lib/
+    main.dart           앱 진입점 (인증 → 온보딩 → 홈)
+    config.dart         API URL, 디자인 토큰 (색상, 톤)
+    models/
+      fiber.dart        Fiber, FiberReply, FiberLink 모델
+    services/
+      api_service.dart  REST API 클라이언트 (전체 API 커버)
+      auth_service.dart JWT 토큰 + 온보딩 상태 (SharedPreferences)
+    screens/
+      auth_screen.dart      로그인/가입 탭 전환
+      onboarding_screen.dart 환영 + 탭 안내
+      home_screen.dart      하단 탭 바 (마주침/캐치/발자취)
+      encounter_tab.dart    만남 탭
+      catch_tab.dart        캐치 탭 (주변부 포함)
+      trail_tab.dart        발자취 탭
+      focus_screen.dart     포커스뷰 (상세 + 답글 + 연결)
+    widgets/
+      fiber_card.dart   조각 카드 (일반/컴팩트)
 
 legacy/               — 구 코드 (Phase 6에서 정리됨, 참조용 보관)
   index.html          구 노트 에디터

@@ -39,6 +39,33 @@ function initDB() {
     created_at INTEGER NOT NULL
   )`);
 
+  // 마이그레이션: verified 컬럼 (기존 사용자는 인증 완료 처리)
+  try {
+    _db.exec(`ALTER TABLE users ADD COLUMN verified INTEGER NOT NULL DEFAULT 0`);
+    _db.exec(`UPDATE users SET verified = 1`);
+  } catch (e) {}
+
+  // 이메일 인증 코드
+  _db.exec(`CREATE TABLE IF NOT EXISTS email_verification_codes (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    code TEXT NOT NULL,
+    expires_at INTEGER NOT NULL,
+    used INTEGER NOT NULL DEFAULT 0,
+    attempts INTEGER NOT NULL DEFAULT 0
+  )`);
+
+  // 마이그레이션: attempts 컬럼
+  try { _db.exec(`ALTER TABLE email_verification_codes ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0`); } catch (e) {}
+
+  // 사용자 프로필
+  _db.exec(`CREATE TABLE IF NOT EXISTS user_profiles (
+    user_id TEXT PRIMARY KEY,
+    occupation TEXT DEFAULT '',
+    context TEXT DEFAULT '',
+    created_at INTEGER NOT NULL
+  )`);
+
   // ─── 조각 ───
   _db.exec(`CREATE TABLE IF NOT EXISTS fibers (
     id TEXT PRIMARY KEY,

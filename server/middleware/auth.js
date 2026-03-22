@@ -3,7 +3,11 @@
  */
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'knitting-dev-secret-change-in-prod';
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL: JWT_SECRET 환경변수가 설정되지 않았습니다.');
+  process.exit(1);
+}
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function authMiddleware(req, res, next) {
   const header = req.headers.authorization;

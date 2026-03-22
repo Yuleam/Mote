@@ -3,6 +3,8 @@
  */
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const { initDB } = require('./db');
 const { authMiddleware } = require('./middleware/auth');
@@ -55,7 +57,21 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-app.use(express.json());
+app.use(helmet());
+app.use(express.json({ limit: '100kb' }));
+
+// Rate limiting — 인증 라우트
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { error: 'Too many requests. Please try again later' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+app.use('/api/auth/verify', authLimiter);
+app.use('/api/auth/resend', authLimiter);
 
 // 정적 파일 서빙 (프로젝트 루트)
 app.use(express.static(path.join(__dirname, '..')));
