@@ -11,7 +11,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { getOne, getDB, generateId } = require('../db');
-const { authMiddleware, JWT_SECRET } = require('../middleware/auth');
+const { authMiddleware, getSecret } = require('../middleware/auth');
 const { sendVerificationCode } = require('../services/email');
 
 const TOKEN_EXPIRY = '7d';
@@ -124,7 +124,7 @@ router.post('/verify', (req, res) => {
     getDB().run('UPDATE users SET verified = 1 WHERE id = ?', [user.id]);
     getDB().run('UPDATE email_verification_codes SET used = 1 WHERE id = ?', [record.id]);
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    const token = jwt.sign({ id: user.id, email: user.email }, getSecret(), { expiresIn: TOKEN_EXPIRY });
     res.json({ token, user: { id: user.id, email: user.email } });
   } catch (err) {
     console.error('POST /api/auth/verify error:', err);
@@ -187,7 +187,7 @@ router.post('/login', async (req, res) => {
       return res.status(403).json({ error: 'Email not verified', needsVerification: true, email: user.email });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: TOKEN_EXPIRY });
+    const token = jwt.sign({ id: user.id, email: user.email }, getSecret(), { expiresIn: TOKEN_EXPIRY });
     res.json({ token, user: { id: user.id, email: user.email } });
   } catch (err) {
     console.error('POST /api/auth/login error:', err);

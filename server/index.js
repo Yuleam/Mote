@@ -97,6 +97,9 @@ app.get('/api/fibers/:id/links', authMiddleware, (req, res, next) => {
 });
 
 async function start() {
+  if (!process.env.JWT_SECRET) {
+    console.error('WARNING: JWT_SECRET 환경변수가 설정되지 않았습니다. 인증이 동작하지 않습니다.');
+  }
   initDB();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`Purl API running on http://localhost:${PORT}`);
