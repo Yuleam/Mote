@@ -1311,6 +1311,35 @@
     }
     .auth-submit:active { opacity: 0.8; }
     .auth-submit:disabled { opacity: 0.15; cursor: not-allowed; }
+    .auth-code-input {
+      font-size: 1.5rem;
+      letter-spacing: 8px;
+      text-align: center;
+      font-weight: 600;
+    }
+    .auth-verify-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+    .auth-verify-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .auth-link {
+      background: none;
+      border: none;
+      font-family: var(--font);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 8px;
+    }
+    .auth-input.is-hidden, #authForm.is-hidden, #authVerify.is-hidden { display: none; }
 
     /* ====== 온보딩 ====== */
     .onboard-overlay {
@@ -1410,9 +1439,23 @@
         <button class="auth-tab" id="authTabRegister">가입</button>
       </div>
       <div id="authError" class="auth-error"></div>
-      <input class="auth-input" id="authEmail" type="email" placeholder="이메일" autocomplete="email">
-      <input class="auth-input" id="authPassword" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="current-password">
-      <button class="auth-submit" id="authSubmit">로그인</button>
+      <!-- 로그인/가입 폼 -->
+      <div id="authForm">
+        <input class="auth-input" id="authEmail" type="email" placeholder="이메일" autocomplete="email">
+        <input class="auth-input" id="authPassword" type="password" placeholder="비밀번호 (8자 이상)" autocomplete="current-password">
+        <input class="auth-input is-hidden" id="authPasswordConfirm" type="password" placeholder="비밀번호 확인" autocomplete="new-password">
+        <button class="auth-submit" id="authSubmit">로그인</button>
+      </div>
+      <!-- 인증 코드 입력 -->
+      <div id="authVerify" class="is-hidden">
+        <p class="auth-verify-desc" id="authVerifyDesc"></p>
+        <input class="auth-input auth-code-input" id="authCode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" autocomplete="one-time-code">
+        <button class="auth-submit" id="authVerifySubmit">인증하기</button>
+        <div class="auth-verify-actions">
+          <button class="auth-link" id="authResend">코드 다시 보내기</button>
+          <button class="auth-link" id="authBackToForm">돌아가기</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1649,14 +1692,44 @@
       var authSubmit = document.getElementById('authSubmit');
       var authEmail = document.getElementById('authEmail');
       var authPassword = document.getElementById('authPassword');
+      var authPasswordConfirm = document.getElementById('authPasswordConfirm');
       var authError = document.getElementById('authError');
+      var authForm = document.getElementById('authForm');
+      var authVerify = document.getElementById('authVerify');
+      var authVerifyDesc = document.getElementById('authVerifyDesc');
+      var authCode = document.getElementById('authCode');
+      var authVerifySubmit = document.getElementById('authVerifySubmit');
+      var authResend = document.getElementById('authResend');
+      var authBackToForm = document.getElementById('authBackToForm');
       var authMode = 'login';
+      var verifyEmail = '';
+      var isRegistering = false;
+
+      function showVerifyUI(email) {
+        verifyEmail = email;
+        authForm.classList.add('is-hidden');
+        authVerify.classList.remove('is-hidden');
+        authVerifyDesc.textContent = email + '으로 인증 코드를 보냈어요';
+        authError.textContent = '';
+        authCode.value = '';
+        authCode.focus();
+        // 탭 숨기기
+        document.querySelector('.auth-tabs').style.display = 'none';
+      }
+
+      function showFormUI() {
+        authForm.classList.remove('is-hidden');
+        authVerify.classList.add('is-hidden');
+        authError.textContent = '';
+        document.querySelector('.auth-tabs').style.display = '';
+      }
 
       authTabLogin.addEventListener('click', function() {
         authMode = 'login';
         authTabLogin.classList.add('is-active');
         authTabRegister.classList.remove('is-active');
         authSubmit.textContent = '로그인';
+        authPasswordConfirm.classList.add('is-hidden');
         authError.textContent = '';
       });
 
@@ -1665,6 +1738,7 @@
         authTabRegister.classList.add('is-active');
         authTabLogin.classList.remove('is-active');
         authSubmit.textContent = '시작하기';
+        authPasswordConfirm.classList.remove('is-hidden');
         authError.textContent = '';
       });
 
@@ -1674,6 +1748,16 @@
         if (!email || !password) {
           authError.textContent = '이메일과 비밀번호를 입력해주세요';
           return;
+        }
+        if (authMode === 'register') {
+          if (password.length < 8) {
+            authError.textContent = '비밀번호는 8자 이상이어야 해요';
+            return;
+          }
+          if (authPasswordConfirm.value !== password) {
+            authError.textContent = '비밀번호가 일치하지 않아요';
+            return;
+          }
         }
         authSubmit.disabled = true;
         authError.textContent = '';
@@ -1685,13 +1769,21 @@
             body: JSON.stringify({ email: email, password: password })
           });
           var data = await res.json();
+
+          // 이메일 인증 필요
+          if (data.needsVerification) {
+            isRegistering = (authMode === 'register');
+            showVerifyUI(data.email || email);
+            return;
+          }
+
           if (!res.ok) {
             authError.textContent = data.error || '문제가 발생했습니다';
             return;
           }
           authToken = data.token;
           localStorage.setItem('purl_token', authToken);
-          if (authMode === 'register') {
+          if (authMode === 'register' || isRegistering) {
             localStorage.setItem('purl_onboarding', 'step1');
           }
           hideAuthOverlay();
@@ -1703,7 +1795,67 @@
         }
       });
 
+      // 인증 코드 확인
+      authVerifySubmit.addEventListener('click', async function() {
+        var code = authCode.value.trim();
+        if (code.length !== 6) {
+          authError.textContent = '6자리 코드를 입력해주세요';
+          return;
+        }
+        authVerifySubmit.disabled = true;
+        authError.textContent = '';
+        try {
+          var res = await fetch('/api/auth/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: verifyEmail, code: code })
+          });
+          var data = await res.json();
+          if (!res.ok) {
+            authError.textContent = data.error || '올바르지 않은 코드예요';
+            return;
+          }
+          authToken = data.token;
+          localStorage.setItem('purl_token', authToken);
+          if (isRegistering) {
+            localStorage.setItem('purl_onboarding', 'step1');
+          }
+          hideAuthOverlay();
+          initApp();
+        } catch (e) {
+          authError.textContent = '서버에 연결할 수 없습니다';
+        } finally {
+          authVerifySubmit.disabled = false;
+        }
+      });
+
+      authCode.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') authVerifySubmit.click();
+      });
+
+      // 코드 재발송
+      authResend.addEventListener('click', async function() {
+        authResend.disabled = true;
+        await fetch('/api/auth/resend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: verifyEmail })
+        });
+        authError.textContent = '';
+        authVerifyDesc.textContent = '새 인증 코드를 보냈어요';
+        setTimeout(function() { authResend.disabled = false; }, 3000);
+      });
+
+      // 인증 화면에서 돌아가기
+      authBackToForm.addEventListener('click', showFormUI);
+
       authPassword.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          if (authMode === 'register') authPasswordConfirm.focus();
+          else authSubmit.click();
+        }
+      });
+      authPasswordConfirm.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') authSubmit.click();
       });
 
