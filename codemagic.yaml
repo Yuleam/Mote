@@ -30,6 +30,17 @@ workflows:
       - name: 키체인 초기화
         script: keychain initialize
 
+      - name: 인증서 키 생성
+        script: |
+          openssl req -nodes -newkey rsa:2048 \
+            -keyout /tmp/cert_key.pem \
+            -out /tmp/cert_csr.pem \
+            -subj "/"
+          echo "CERTIFICATE_PRIVATE_KEY<<EOF" >> $CM_ENV
+          cat /tmp/cert_key.pem >> $CM_ENV
+          echo "EOF" >> $CM_ENV
+
+
       - name: 서명 인증서 + 프로비저닝 프로파일
         script: |
           app-store-connect fetch-signing-files $BUNDLE_ID \
