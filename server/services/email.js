@@ -1,41 +1,32 @@
 /**
- * 이메일 발송 서비스 (Nodemailer + Gmail SMTP)
- * 환경변수: SMTP_USER, SMTP_PASS
+ * 이메일 발송 서비스 (Resend HTTP API)
+ * 환경변수: RESEND_API_KEY
  */
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-let transporter = null;
+let resend = null;
 
-function getTransporter() {
-  if (transporter) return transporter;
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('[email] SMTP_USER/SMTP_PASS 미설정 — 이메일 발송 불가');
+function getClient() {
+  if (resend) return resend;
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[email] RESEND_API_KEY 미설정 — 이메일 발송 불가');
     return null;
   }
-  transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
-  return transporter;
+  resend = new Resend(process.env.RESEND_API_KEY);
+  return resend;
 }
 
 async function sendVerificationCode(toEmail, code) {
   console.log('[email] sendVerificationCode 호출:', toEmail);
-  console.log('[email] SMTP_USER:', process.env.SMTP_USER ? '설정됨' : '없음');
-  console.log('[email] SMTP_PASS:', process.env.SMTP_PASS ? '설정됨' : '없음');
-  const t = getTransporter();
-  if (!t) {
-    console.warn(`[email] 인증 코드 ${code} → ${toEmail} (SMTP 미설정, 로그만 출력)`);
+  const client = getClient();
+  if (!client) {
+    console.warn(`[email] 인증 코드 ${code} → ${toEmail} (API 키 미설정, 로그만 출력)`);
     return false;
   }
 
-  console.log('[email] 발송 시도...');
   try {
-    await t.sendMail({
-      from: `"Purl" <${process.env.SMTP_USER}>`,
+    const { data, error } = await client.emails.send({
+      from: 'Purl <onboarding@resend.dev>',
       to: toEmail,
       subject: 'Purl 이메일 인증 코드',
       html: `
@@ -53,12 +44,15 @@ async function sendVerificationCode(toEmail, code) {
         </div>
       `,
     });
-    console.log('[email] 발송 성공:', toEmail);
+
+    if (error) {
+      console.error('[email] 발송 실패:', error);
+      return false;
+    }
+    console.log('[email] 발송 성공:', toEmail, 'id:', data?.id);
     return true;
   } catch (err) {
-    console.error('[email] 발송 실패:', err.message);
-    console.error('[email] 에러 코드:', err.code);
-    console.error('[email] 전체 에러:', err);
+    console.error('[email] 발송 에러:', err.message);
     return false;
   }
 }
