@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class AppConfig {
-  static const String apiBaseUrl = 'https://purl-production.up.railway.app';
+  static const String apiBaseUrl = 'https://moteapp.cc';
 }
 
 class AppColors {
