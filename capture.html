@@ -1623,7 +1623,16 @@
       var API = '/api';
 
       // ─── 인증 ───
-      var authToken = localStorage.getItem('purl_token');
+      // 기존 토큰 마이그레이션 (purl → mote)
+      if (!localStorage.getItem('mote_token') && localStorage.getItem('purl_token')) {
+        localStorage.setItem('mote_token', localStorage.getItem('purl_token'));
+        localStorage.removeItem('purl_token');
+      }
+      if (!localStorage.getItem('mote_onboarding') && localStorage.getItem('purl_onboarding')) {
+        localStorage.setItem('mote_onboarding', localStorage.getItem('purl_onboarding'));
+        localStorage.removeItem('purl_onboarding');
+      }
+      var authToken = localStorage.getItem('mote_token');
       _log('[2] token=' + (authToken ? 'yes' : 'no'));
 
       function apiFetch(url, opts) {
@@ -1635,7 +1644,7 @@
         return fetch(url, opts).then(function(res) {
           if (res.status === 401) {
             authToken = null;
-            localStorage.removeItem('purl_token');
+            localStorage.removeItem('mote_token');
             showAuthOverlay();
           }
           return res;
@@ -1651,7 +1660,7 @@
       }
 
       // ─── 온보딩 ───
-      var onboardStep = localStorage.getItem('purl_onboarding'); // 'step1' | 'step2' | null
+      var onboardStep = localStorage.getItem('mote_onboarding'); // 'step1' | 'step2' | null
       var onboardOverlay = document.getElementById('onboardOverlay');
       var onboardCoach = document.getElementById('onboardCoach');
       var onboardCelebrate = document.getElementById('onboardCelebrate');
@@ -1663,7 +1672,7 @@
 
       document.getElementById('onboardStartBtn').addEventListener('click', function() {
         onboardStep = 'step2';
-        localStorage.setItem('purl_onboarding', 'step2');
+        localStorage.setItem('mote_onboarding', 'step2');
         onboardOverlay.classList.add('is-hidden');
         showView(captureView);
         onboardCoach.classList.remove('is-hidden');
@@ -1673,7 +1682,7 @@
 
       document.getElementById('onboardDoneBtn').addEventListener('click', function() {
         onboardStep = null;
-        localStorage.removeItem('purl_onboarding');
+        localStorage.removeItem('mote_onboarding');
         onboardCelebrate.classList.add('is-hidden');
       });
 
@@ -1794,9 +1803,9 @@
             return;
           }
           authToken = data.token;
-          localStorage.setItem('purl_token', authToken);
+          localStorage.setItem('mote_token', authToken);
           if (authMode === 'register' || isRegistering) {
-            localStorage.setItem('purl_onboarding', 'step1');
+            localStorage.setItem('mote_onboarding', 'step1');
           }
           hideAuthOverlay();
           initApp();
@@ -1828,9 +1837,9 @@
             return;
           }
           authToken = data.token;
-          localStorage.setItem('purl_token', authToken);
+          localStorage.setItem('mote_token', authToken);
           if (isRegistering) {
-            localStorage.setItem('purl_onboarding', 'step1');
+            localStorage.setItem('mote_onboarding', 'step1');
           }
           hideAuthOverlay();
           initApp();
@@ -1875,7 +1884,7 @@
       document.getElementById('logoutBtn').addEventListener('click', function() {
         if (!confirm('Sign out?')) return;
         authToken = null;
-        localStorage.removeItem('purl_token');
+        localStorage.removeItem('mote_token');
         appInitialized = false;
         showAuthOverlay();
       });
@@ -2296,7 +2305,7 @@
           // 온보딩 Step 2 → 3: 첫 조각 잡기 완료
           if (onboardStep === 'step2') {
             onboardStep = 'step3';
-            localStorage.removeItem('purl_onboarding');
+            localStorage.removeItem('mote_onboarding');
             onboardCoach.classList.add('is-hidden');
             onboardCelebrate.classList.remove('is-hidden');
           }

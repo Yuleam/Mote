@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "app.purl" "\0"
-            VALUE "FileDescription", "purl" "\0"
+            VALUE "CompanyName", "app.mote" "\0"
+            VALUE "FileDescription", "mote" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "purl" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 app.purl. All rights reserved." "\0"
-            VALUE "OriginalFilename", "purl.exe" "\0"
-            VALUE "ProductName", "purl" "\0"
+            VALUE "InternalName", "mote" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 app.mote. All rights reserved." "\0"
+            VALUE "OriginalFilename", "mote.exe" "\0"
+            VALUE "ProductName", "mote" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

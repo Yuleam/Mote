@@ -1,7 +1,7 @@
 # App Store 제출 정보
 
 ## 앱 이름
-Purl
+Mote
 
 ## 부제 (30자 이내)
 그 순간의 영감을 다시 만나다.
@@ -15,10 +15,10 @@ Productivity (보조 카테고리)
 ## 한국어 설명
 
 오!? 하는 영감은 기록하지 않으면 쉽게 잊혀집니다.
-Purl은 그 영감을 쉽게 기록하고 다시 만나게 해줍니다.
+Mote는 그 영감을 쉽게 기록하고 다시 만나게 해줍니다.
 
 메모 앱이 아닙니다. 정리하지도 분류하지도 않습니다.
-영감을 느낀 그 순간, Purl에 기록했던 문장은 어느 날 선물처럼 당신을 찾아옵니다.
+영감을 느낀 그 순간, Mote에 기록했던 문장은 어느 날 선물처럼 당신을 찾아옵니다.
 
 **캐치**
 문장 하나, 그 순간의 감도와 방향만 기록합니다.
@@ -39,7 +39,7 @@ Purl은 그 영감을 쉽게 기록하고 다시 만나게 해줍니다.
 ## English Description
 
 That spark of inspiration — gone if you don't write it down.
-Purl lets you capture it easily and meet it again.
+Mote lets you capture it easily and meet it again.
 
 This is not a note app. It doesn't organize. It doesn't categorize.
 The words you saved in a moment of inspiration come back to you one day, like a gift.
@@ -67,4 +67,4 @@ journal,reflection,thought,mindfulness,rediscovery,writing,diary,contemplation,s
 (GitHub Pages에 게시 후 기입)
 
 ## 지원 URL
-https://github.com/Yuleam/Purl
+https://github.com/Yuleam/Mote

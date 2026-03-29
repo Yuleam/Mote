@@ -1,4 +1,4 @@
-package app.purl.purl
+package app.mote.mote
 
 import io.flutter.embedding.android.FlutterActivity
 

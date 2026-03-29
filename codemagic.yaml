@@ -8,8 +8,8 @@ workflows:
     environment:
       node: 22
       vars:
-        BUNDLE_ID: "app.purl.knitting"
-        APP_NAME: "Purl"
+        BUNDLE_ID: "app.mote.mote"
+        APP_NAME: "Mote"
     triggering:
       events:
         - push

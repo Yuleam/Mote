@@ -1,4 +1,4 @@
-# Purl 보안 점검 보고서
+# Mote 보안 점검 보고서
 
 작성일: 2026-03-22
 범위: 서버(Node.js/Express) + iOS 앱(Flutter) + 인증 시스템 전체

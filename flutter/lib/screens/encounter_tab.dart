@@ -48,7 +48,7 @@ class _EncounterTabState extends State<EncounterTab> {
             child: Row(
               children: [
                 Text(
-                  'Purl',
+                  'Mote',
                   style: GoogleFonts.gowunBatang(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,

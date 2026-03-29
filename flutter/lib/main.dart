@@ -7,16 +7,16 @@ import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
 
 void main() {
-  runApp(const PurlApp());
+  runApp(const MoteApp());
 }
 
-class PurlApp extends StatelessWidget {
-  const PurlApp({super.key});
+class MoteApp extends StatelessWidget {
+  const MoteApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Purl',
+      title: 'Mote',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.bg,
