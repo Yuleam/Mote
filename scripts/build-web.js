@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SERVER_URL = 'https://purl-production.up.railway.app';
+const SERVER_URL = 'https://moteapp.cc';
 const ROOT = path.resolve(__dirname, '..');
 const WWW = path.join(ROOT, 'www');
 
