@@ -1,6 +1,6 @@
 {
-    "name": "purl",
-    "short_name": "purl",
+    "name": "mote",
+    "short_name": "mote",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

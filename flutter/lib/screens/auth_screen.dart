@@ -272,7 +272,7 @@ class _AuthScreenState extends State<AuthScreen> {
               children: [
                 // 로고
                 Text(
-                  'Purl',
+                  'Mote',
                   style: GoogleFonts.gowunBatang(
                     fontSize: 32,
                     fontWeight: FontWeight.w400,
